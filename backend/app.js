@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const postsRoutes = require('./routes/posts');
+const userRoutes = require('./routes/user');
 
 const app = express();
 
@@ -26,7 +27,7 @@ app.use((request, response, next) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
   response.setHeader(
     "Access-Control-Allow-Methods",
@@ -36,5 +37,6 @@ app.use((request, response, next) => {
 });
 
 app.use("/api/posts", postsRoutes);
+app.use("/api/user", userRoutes);
 
 module.exports = app;
