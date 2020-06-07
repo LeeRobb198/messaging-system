@@ -34,7 +34,8 @@ router.post("", checkAuth, multer({storage: storage}).single("image"), (request,
   const post = new Post({
     title: request.body.title,
     content: request.body.content,
-    imagePath: url + "/images/" + request.file.filename
+    imagePath: url + "/images/" + request.file.filename,
+    creator: request.userData.userId
   });
   post.save().then(createdPost => {
     response.status(201).json({
@@ -48,7 +49,7 @@ router.post("", checkAuth, multer({storage: storage}).single("image"), (request,
 });
 
 // Update request
-router.put("/:id", checkAuth, multer({storage: storage}).single("image"), (request, response, next) => {
+router.put("/:id", checkAuth, multer({ storage: storage }).single("image"), (request, response, next) => {
   let imagePath = request.body.imagePath;
   if (request.file) {
     const url = request.protocol + '://' + request.get("host");
@@ -58,13 +59,16 @@ router.put("/:id", checkAuth, multer({storage: storage}).single("image"), (reque
     _id: request.body.id,
     title: request.body.title,
     content: request.body.content,
-    imagePath: imagePath
+    imagePath: imagePath,
+    creator: request.userData.userId
   });
-  console.log(post);
-  Post.updateOne({ _id: request.params.id }, post)
+  Post.updateOne({ _id: request.params.id, creator: request.userData.userId }, post)
   .then(result => {
-    console.log(result);
-    response.status(200).json({ message: "Update successful!" });
+    if (result.nModified > 0) {
+      response.status(200).json({ message: "Update successful!" });
+    } else {
+      response.status(401).json({ message: "Not authorized!" });
+    }
   });
 });
 
@@ -105,11 +109,12 @@ router.get("/:id", (request, response, next) => {
 
 // DELETE request
 router.delete("/:id", checkAuth, (request, response, next) => {
-  Post.deleteOne({ _id: request.params.id }).then(result => {
-    console.log(result);
-    response.status(200).json({
-      message: "Post deleted successfully!"
-    });
+  Post.deleteOne({ _id: request.params.id, creator: request.userData.userId }).then(result => {
+    if (result.n > 0) {
+      response.status(200).json({ message: "Deletion successful!" });
+    } else {
+      response.status(401).json({ message: "Not authorized!" });
+    }
   });
 });
 
