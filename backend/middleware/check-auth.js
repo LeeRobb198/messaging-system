@@ -8,7 +8,7 @@ module.exports = (request, response, next) => {
     next();
   } catch (error) {
     response.status(401).json({
-      message: "Auth failed"
+      message: "You are not authenticated!"
     });
   }
 };
